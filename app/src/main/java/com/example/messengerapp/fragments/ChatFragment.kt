@@ -53,11 +53,11 @@ class ChatFragment : Fragment() {
             value!!.documents.forEach{
                 items.add(ChatItems(it.id , it.toObject(User::class.java)!!,activity!!))
             }
-            init_recycle_rview(items)
+            init_recycler_view(items)
         }
     }
 
-    private fun init_recycle_rview( items:List<Item> ){
+    private fun init_recycler_view( items:List<Item> ){
         chat_recycler_view.apply {
             layoutManager = LinearLayoutManager(activity)
             adapter = GroupAdapter<ViewHolder>().apply {

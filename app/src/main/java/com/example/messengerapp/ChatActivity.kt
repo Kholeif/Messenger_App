@@ -4,10 +4,17 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.messengerapp.RecyclerView.ChatItems
+import com.example.messengerapp.RecyclerView.TextItems
 import com.example.messengerapp.glide.GlideApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
+import com.xwray.groupie.GroupAdapter
+import com.xwray.groupie.ViewHolder
 import kotlinx.android.synthetic.main.activity_chat.*
 import java.util.*
 
@@ -16,6 +23,7 @@ class ChatActivity : AppCompatActivity() {
     var db = FirebaseFirestore.getInstance()
     var other_uid =""
     var chanel_id =""
+    val message_adapter = GroupAdapter<ViewHolder>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,27 +58,53 @@ class ChatActivity : AppCompatActivity() {
         return false
     }
 
-    private fun create_chat_channel(){
+    fun create_chat_channel(){
         db.collection("users").document(my_uid).collection("chat_channel").document(other_uid).get().addOnSuccessListener{
             if(it.exists()){
                 chanel_id = it["channel_ID"] as String
+                getMesseges(chanel_id)
                 return@addOnSuccessListener
             }
             val new_chat_channel = db.collection("users").document()
             chanel_id = new_chat_channel.id
             db.collection("users").document(other_uid).collection("chat_channel").document(my_uid).set(mapOf("channel_ID" to chanel_id))
             db.collection("users").document(my_uid).collection("chat_channel").document(other_uid).set(mapOf("channel_ID" to chanel_id))
+            getMesseges(chanel_id)
         }
     }
 
     fun send_message(view: View) {
         val text = editTextTextPersonName4.text.toString()
-        editTextTextPersonName4.setText("")
-        val message = TextMessage(text,my_uid ,Calendar.getInstance().time)
-        db.collection("chat_channels").document(chanel_id).collection("messages").add(message)
+        if(text.isNotEmpty()){
+            val message = TextMessage(text,my_uid ,other_uid ,Calendar.getInstance().time)
+            db.collection("chat_channels").document(chanel_id).collection("messages").add(message)
+            editTextTextPersonName4.setText("")
+        }
     }
 
-    fun getMessege(channelID:String){
+    fun getMesseges (chanel_id:String){
+        db.collection("chat_channels").document(chanel_id).collection("messages").orderBy("date",Query.Direction.DESCENDING).addSnapshotListener { value, error ->
+            message_adapter.clear()
+            if (error!=null){
+                return@addSnapshotListener
+            }
+            value!!.documents.forEach{
+                val message = it.toObject(TextMessage::class.java)
+                if (message!!.sederID==my_uid)
+                {
+                    message_adapter.add(TextItems(message , it.id , this,"1"))
+                }
+                else{
+                    message_adapter.add(TextItems(message , it.id , this,"2"))
+                }
 
+            }
+        }
+        init_recycler_view()
+    }
+    fun init_recycler_view(){
+        chat_recyclerView.apply {
+            adapter = message_adapter
+        }
     }
 }
