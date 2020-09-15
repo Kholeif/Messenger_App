@@ -56,6 +56,7 @@
         android:layout_height="50dp"
         android:layout_marginStart="8dp"
         android:layout_marginBottom="8dp"
+        android:onClick="send_image"
         android:src="@drawable/insert_photo"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"></de.hdodenhof.circleimageview.CircleImageView>

@@ -15,7 +15,7 @@ class ChatItems(val uid:String , val user: User , val context: Context) : Item()
         viewHolder.textView.text = user.name
         viewHolder.textView3.text="Time"
         viewHolder.textView2.text="last message"
-        if (user.profileImage.isNotEmpty())
+        if (user.profileImage!="")
         {
             GlideApp.with(context)
                 .load(FirebaseStorage.getInstance().getReference(user.profileImage))
