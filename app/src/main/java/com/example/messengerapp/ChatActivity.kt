@@ -24,7 +24,7 @@ import java.io.ByteArrayOutputStream
 import java.util.*
 
 class ChatActivity : AppCompatActivity() {
-    var a7aaaaaaaaa = ""
+
     val my_uid = FirebaseAuth.getInstance().currentUser!!.uid
     var db = FirebaseFirestore.getInstance()
     private var mStorageRef: StorageReference? = null
@@ -32,6 +32,10 @@ class ChatActivity : AppCompatActivity() {
     lateinit var other_uid: String
     private lateinit var chanel_id: String
     val message_adapter = GroupAdapter<ViewHolder>()
+
+    lateinit var senderName : String
+    lateinit var recieptientName : String
+    lateinit var sender_image_path : String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +60,9 @@ class ChatActivity : AppCompatActivity() {
                 .load(FirebaseStorage.getInstance().getReference(path))
                 .into(profile_image)
         }
+
+
+        get_user_info()
         create_chat_channel {
             getMesseges(it)
         }
@@ -89,8 +96,23 @@ class ChatActivity : AppCompatActivity() {
     fun send_message(view: View) {
         val text = editTextTextPersonName4.text.toString()
         if (text.isNotEmpty()) {
-            val message = TextMessage(text, my_uid, other_uid, Calendar.getInstance().time ,"TEXT")
+
+            val message = TextMessage(text , my_uid , other_uid , senderName , recieptientName , Calendar.getInstance().time ,sender_image_path,"TEXT")
+
+            val contentMessage = mutableMapOf<String,Any>()
+            contentMessage["text"]=message.text
+            contentMessage["senderID"]=message.senderID
+            contentMessage["recieptientID"]=message.recieptientID
+            contentMessage["senderName"]=message.senderName
+            contentMessage["recieptientName"]=message.recieptientName
+            contentMessage["date"]=message.date
+            contentMessage["type"]=message.type
+            contentMessage["sender_image_path"]=message.sender_image_path
+
             db.collection("chat_channels").document(chanel_id).collection("messages").add(message)
+            db.collection("users").document(my_uid).collection("chat_channel").document(other_uid).update(contentMessage)
+            db.collection("users").document(other_uid).collection("chat_channel").document(my_uid).update(contentMessage)
+
             editTextTextPersonName4.setText("")
         }
     }
@@ -156,12 +178,37 @@ class ChatActivity : AppCompatActivity() {
         val ref = mStorageRef!!.child(my_uid).child("images").child(UUID.nameUUIDFromBytes(selected_image_bytes).toString())
         ref.putBytes(selected_image_bytes).addOnCompleteListener {
             if (it.isSuccessful) {
-                Toast.makeText(this, "Done uploading to storage firebase", Toast.LENGTH_LONG).show()
-                val image_message = TextMessage(ref.path,my_uid,other_uid,Calendar.getInstance().time,"IMAGE")
+//                Toast.makeText(this, "Done uploading to storage firebase", Toast.LENGTH_LONG).show()
+                val image_message = TextMessage(ref.path,my_uid,other_uid,senderName , recieptientName , Calendar.getInstance().time,sender_image_path,"IMAGE")
+
+                val contentMessage = mutableMapOf<String,Any>()
+                contentMessage["text"]="Image"
+                contentMessage["senderID"]=image_message.senderID
+                contentMessage["recieptientID"]=image_message.recieptientID
+                contentMessage["senderName"]=image_message.senderName
+                contentMessage["recieptientName"]=image_message.recieptientName
+                contentMessage["date"]=image_message.date
+                contentMessage["type"]=image_message.type
+                contentMessage["sender_image_path"]=image_message.sender_image_path
+
                 db.collection("chat_channels").document(chanel_id).collection("messages").add(image_message)
+                db.collection("users").document(my_uid).collection("chat_channel").document(other_uid).update(contentMessage)
+                db.collection("users").document(other_uid).collection("chat_channel").document(my_uid).update(contentMessage)
+
             } else {
                 Toast.makeText(this, "Error uploading to storage firebase : " + it.exception!!.message, Toast.LENGTH_LONG).show()
             }
+        }
+    }
+    fun get_user_info(){
+        db.collection("users").document(my_uid).get().addOnSuccessListener {
+            val user = it.toObject(User::class.java)!!
+            senderName = user.name
+            sender_image_path = user.profileImage
+        }
+        db.collection("users").document(other_uid).get().addOnSuccessListener {
+            val user = it.toObject(User::class.java)!!
+            recieptientName = user.name
         }
     }
 }

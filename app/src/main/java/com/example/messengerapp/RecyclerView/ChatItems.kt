@@ -2,6 +2,7 @@ package com.example.messengerapp.RecyclerView
 
 import android.content.Context
 import com.example.messengerapp.R
+import com.example.messengerapp.TextMessage
 import com.example.messengerapp.User
 import com.example.messengerapp.glide.GlideApp
 import com.google.firebase.storage.FirebaseStorage
@@ -9,12 +10,13 @@ import com.xwray.groupie.kotlinandroidextensions.Item
 import com.xwray.groupie.kotlinandroidextensions.ViewHolder
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.recycler_view_item.*
+import java.util.*
 
-class ChatItems(val uid:String , val user: User , val context: Context) : Item() {
+class ChatItems(val uid:String , val user: User , val text :String , val date : String , val context: Context) : Item() {
     override fun bind(viewHolder: ViewHolder, position: Int) {
         viewHolder.textView.text = user.name
-        viewHolder.textView3.text="Time"
-        viewHolder.textView2.text="last message"
+        viewHolder.textView3.text= date
+        viewHolder.textView2.text= text
         if (user.profileImage!="")
         {
             GlideApp.with(context)

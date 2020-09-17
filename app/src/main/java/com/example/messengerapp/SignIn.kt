@@ -9,6 +9,8 @@ import android.util.Patterns
 import android.view.View
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.iid.FirebaseInstanceId
 import kotlinx.android.synthetic.main.activity_sign_in.*
 import kotlinx.android.synthetic.main.activity_sign_in.button
 import kotlinx.android.synthetic.main.activity_sign_in.editTextTextEmailAddress
@@ -18,6 +20,7 @@ import kotlinx.android.synthetic.main.activity_sign_up.*
 class SignIn : AppCompatActivity() , TextWatcher {
 
     var mAuth: FirebaseAuth? = null
+    var db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +72,10 @@ class SignIn : AppCompatActivity() , TextWatcher {
         progressBar2.visibility = View.VISIBLE
         mAuth!!.signInWithEmailAndPassword(email,password).addOnCompleteListener {
             if (it.isSuccessful) {
+                FirebaseInstanceId.getInstance().instanceId.addOnCompleteListener{ it2 ->
+                    val token = it2.result!!.token
+                    db.collection("users").document(mAuth!!.currentUser!!.uid).update(mapOf("token" to token))
+                }
                 Toast.makeText(applicationContext, "done sign in", Toast.LENGTH_LONG).show()
                 progressBar2.visibility = View.GONE
 

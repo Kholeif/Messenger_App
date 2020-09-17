@@ -2,6 +2,7 @@ package com.example.messengerapp.fragments
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,10 +12,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.messengerapp.ChatActivity
 import com.example.messengerapp.R
 import com.example.messengerapp.RecyclerView.ChatItems
+import com.example.messengerapp.TextMessage
 import com.example.messengerapp.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Query
 import com.xwray.groupie.GroupAdapter
 import com.xwray.groupie.OnItemClickListener
 import com.xwray.groupie.Section
@@ -25,6 +28,7 @@ import kotlinx.android.synthetic.main.fragment_chat.*
 class ChatFragment : Fragment() {
 
     private var mAuth: FirebaseAuth? = null
+    val my_uid = FirebaseAuth.getInstance().currentUser!!.uid
     var db = FirebaseFirestore.getInstance()
 
     private lateinit var chatSection: Section
@@ -46,40 +50,70 @@ class ChatFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_chat, container, false)
     }
 
-        private fun addchatlistener() : ListenerRegistration {
-        return db.collection("users").addSnapshotListener { value, error ->
-            if (error!=null){
-                return@addSnapshotListener
-            }
-            val items = mutableListOf<Item>()
-            value!!.documents.forEach{
-                val user = it.toObject(User::class.java)!!
-                if (it.id != mAuth!!.currentUser!!.uid){
-                    items.add(ChatItems( it.id , user ,activity!!))
-                }
-            }
-            init_recycler_view(items)
-        }
+    override fun onResume() {
+        super.onResume()
+        addchatlistener()
     }
 
-    // 3shan ye3red elnas elly fe chats mabeny w mabenhom bssss
 //    private fun addchatlistener(): ListenerRegistration {
-//        return db.collection("users").document(mAuth!!.currentUser!!.uid).collection("chat_channel").addSnapshotListener { value, error ->
-//                if (error != null) {
-//                    return@addSnapshotListener
-//                }
-//                val items = mutableListOf<Item>()
-//                value!!.documents.forEach {
-//                    val user = db.collection("users").document(it.id).get().addOnSuccessListener {
-//                        val user = it.toObject(User::class.java)!!
-//                        if (it.id != mAuth!!.currentUser!!.uid) {
-//                            items.add(ChatItems(it.id, user, activity!!))
+//        return db.collection("users").addSnapshotListener { value, error ->
+//            if (error != null) {
+//                return@addSnapshotListener
+//            }
+//            val items = mutableListOf<Item>()
+//            value!!.documents.forEach {
+//                val user = it.toObject(User::class.java)!!
+//                if (it.id != my_uid) {
+//                    db.collection("users").document(my_uid).collection("chat_channel").document(it.id).get().addOnSuccessListener { it2 ->
+//                        if (it2.exists()) {
+//                            val textMessage = it2.toObject(TextMessage::class.java)
+//                            var text:String?=null
+//                            if (textMessage!!.senderID == my_uid){
+//                                text = "You : "+textMessage.text
+//                            }
+//                            else{
+//                                text = "Him : "+textMessage.text
+//                            }
+//                            val date = DateFormat.format("hh:mm a",textMessage.date).toString()
+//                            items.add(ChatItems(it.id, user, text, date, activity!!))
 //                        }
 //                        init_recycler_view(items)
 //                    }
+////                    items.add(ChatItems( it.id , user ,activity!!))
 //                }
 //            }
+////            init_recycler_view(items)
+//        }
 //    }
+
+    // 3shan ye3red elnas elly fe chats mabeny w mabenhom bssss
+    private fun addchatlistener(): ListenerRegistration {
+        return db.collection("users").document(mAuth!!.currentUser!!.uid).collection("chat_channel")
+            .orderBy("date", Query.Direction.DESCENDING).addSnapshotListener { value, error ->
+                if (error != null) {
+                    return@addSnapshotListener
+                }
+                val items = mutableListOf<Item>()
+                value!!.documents.forEach {
+                    if (it.exists()) {
+                        val textMessage = it.toObject(TextMessage::class.java)
+                        var text: String? = null
+                        if (textMessage!!.senderID == my_uid) {
+                            text = "You : " + textMessage.text
+                        } else {
+                            text = "Him : " + textMessage.text
+                        }
+                        val date = DateFormat.format("hh:mm a", textMessage.date).toString()
+                        val user =
+                            db.collection("users").document(it.id).get().addOnSuccessListener {
+                                val user = it.toObject(User::class.java)!!
+                                items.add(ChatItems(it.id, user, text, date, activity!!))
+                                init_recycler_view(items)
+                            }
+                    }
+                }
+            }
+    }
 
     private fun init_recycler_view(items: List<Item>) {
         chat_recycler_view.apply {

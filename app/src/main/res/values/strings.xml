@@ -2,4 +2,7 @@
     <string name="app_name">Messenger App</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="chat_channel_name">channel name</string>
+    <string name="chat_channel_descriptionText">channel descriptionText</string>
+
 </resources>
