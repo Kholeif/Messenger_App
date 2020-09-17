@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.messengerapp">
-    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -11,11 +12,8 @@
         android:roundIcon="@drawable/messenger"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ChatActivity">
-            android:launchMode="singleTask"
-            android:taskAffinity=""
-            android:excludeFromRecents="true"
-        </activity>
+        <activity android:name=".SearchActivity"></activity>
+        <activity android:name=".ChatActivity"></activity>
         <activity android:name=".ProfileActivity" />
         <activity android:name=".SignUp" />
         <activity android:name=".SignIn">
@@ -27,11 +25,9 @@
         </activity>
         <activity android:name=".MainActivity" />
 
-
-        <service
-            android:name=".Service.MyFirebaseMessagingService">
+        <service android:name=".Service.MyFirebaseMessagingService">
             <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
     </application>

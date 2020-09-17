@@ -7,13 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.messengerapp.ChatActivity
-import com.example.messengerapp.R
+import com.example.messengerapp.*
 import com.example.messengerapp.RecyclerView.ChatItems
-import com.example.messengerapp.TextMessage
-import com.example.messengerapp.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
@@ -24,10 +22,10 @@ import com.xwray.groupie.Section
 import com.xwray.groupie.ViewHolder
 import com.xwray.groupie.kotlinandroidextensions.Item
 import kotlinx.android.synthetic.main.fragment_chat.*
+import kotlinx.android.synthetic.main.fragment_chat.view.*
 
 class ChatFragment : Fragment() {
 
-    private var mAuth: FirebaseAuth? = null
     val my_uid = FirebaseAuth.getInstance().currentUser!!.uid
     var db = FirebaseFirestore.getInstance()
 
@@ -39,7 +37,12 @@ class ChatFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        mAuth = FirebaseAuth.getInstance()
+        val view =inflater.inflate(R.layout.fragment_chat, container, false)
+
+        view.imageView.setOnClickListener{
+            val intent=Intent(activity,SearchActivity::class.java)
+            startActivity(intent)
+        }
 
         // Inflate the layout for this fragment
         val ourtitle = activity!!.findViewById<TextView>(R.id.our_title)
@@ -47,7 +50,7 @@ class ChatFragment : Fragment() {
 
         //listening of chats
         addchatlistener()
-        return inflater.inflate(R.layout.fragment_chat, container, false)
+        return view
     }
 
     override fun onResume() {
@@ -88,12 +91,14 @@ class ChatFragment : Fragment() {
 
     // 3shan ye3red elnas elly fe chats mabeny w mabenhom bssss
     private fun addchatlistener(): ListenerRegistration {
-        return db.collection("users").document(mAuth!!.currentUser!!.uid).collection("chat_channel")
+        return db.collection("users").document(my_uid).collection("chat_channel")
             .orderBy("date", Query.Direction.DESCENDING).addSnapshotListener { value, error ->
                 if (error != null) {
                     return@addSnapshotListener
                 }
+
                 val items = mutableListOf<Item>()
+
                 value!!.documents.forEach {
                     if (it.exists()) {
                         val textMessage = it.toObject(TextMessage::class.java)
@@ -104,10 +109,9 @@ class ChatFragment : Fragment() {
                             text = "Him : " + textMessage.text
                         }
                         val date = DateFormat.format("hh:mm a", textMessage.date).toString()
-                        val user =
-                            db.collection("users").document(it.id).get().addOnSuccessListener {
-                                val user = it.toObject(User::class.java)!!
-                                items.add(ChatItems(it.id, user, text, date, activity!!))
+                            db.collection("users").document(it.id).get().addOnSuccessListener {it2 ->
+                                val user = it2.toObject(User::class.java)!!
+                                items.add(ChatItems(it2.id, user, text, date, activity!!))
                                 init_recycler_view(items)
                             }
                     }
