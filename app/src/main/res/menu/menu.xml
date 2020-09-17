@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
         android:id="@+id/sign_out"
         android:title="Sign out" />
+    <item
+        android:id="@+id/new_message"
+        android:icon="@drawable/ic_baseline_open_in_new_24"
+        android:title="new message"
+        android:visible="true"
+        app:showAsAction="always" />
 </menu>

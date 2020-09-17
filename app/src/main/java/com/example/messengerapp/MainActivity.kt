@@ -77,6 +77,10 @@ class MainActivity : AppCompatActivity() , NavigationView.OnNavigationItemSelect
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)     //3shan mat5allenesh a3mel back
             startActivity(intent)
         }
+        if (id==R.id.new_message){
+            val intent=Intent(this,SearchActivity::class.java)
+            startActivity(intent)
+        }
         return super.onOptionsItemSelected(item)
     }
     //end menu

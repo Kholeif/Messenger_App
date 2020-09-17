@@ -23,6 +23,26 @@ class SearchItems(val uid:String , val user: User, val context: Context) : Item(
 
     }
 
+    override fun isSameAs(other: com.xwray.groupie.Item<*>?): Boolean {
+        if(other !is SearchItems){
+            return false
+        }
+        if (this.user != other.user){
+            return false
+        }
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = user.hashCode()
+        result = 31 * result + context.hashCode()
+        return result
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return isSameAs(other as SearchItems)
+    }
+
     override fun getLayout(): Int {
         return R.layout.recycler_view_item_6
     }

@@ -55,7 +55,7 @@ class SearchActivity : AppCompatActivity() {
             setSearchableInfo(searchManager.getSearchableInfo(componentName))
 
             setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-                override fun onQueryTextSubmit(query: String?): Boolean {
+                override fun onQueryTextSubmit(newText: String?): Boolean {
                     return true
                 }
 
