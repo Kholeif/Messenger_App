@@ -28,6 +28,8 @@ class SignIn : AppCompatActivity() , TextWatcher {
 
         mAuth = FirebaseAuth.getInstance()
 
+        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR   // 3shan yezher elkalam beleswed badal elabyad
+
         editTextTextEmailAddress.addTextChangedListener(this)
         editTextTextPassword.addTextChangedListener(this)
     }

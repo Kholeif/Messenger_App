@@ -8,9 +8,11 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.SearchView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.messengerapp.RecyclerView.SearchItems
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.xwray.groupie.GroupAdapter
@@ -22,6 +24,7 @@ import kotlinx.android.synthetic.main.activity_search.*
 
 class SearchActivity : AppCompatActivity() {
 
+    val my_uid = FirebaseAuth.getInstance().currentUser!!.uid
     var db = FirebaseFirestore.getInstance()
     lateinit var searchSection: Section
     var shouldinitrecyclerview = true
@@ -31,8 +34,9 @@ class SearchActivity : AppCompatActivity() {
         setContentView(R.layout.activity_search)
 
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR   // 3shan yezher elkalam beleswed badal elabyad
+
         setSupportActionBar(toolbar3)
-        supportActionBar!!.title = "Search"
+        supportActionBar!!.title = ""
         supportActionBar!!.setHomeButtonEnabled(true)
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
 
@@ -49,7 +53,7 @@ class SearchActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.search_menu, menu)
         val searchManager = getSystemService(Context.SEARCH_SERVICE) as SearchManager
-        (menu!!.findItem(R.id.app_bar_search)!!.actionView as SearchView).apply {
+        (menu?.findItem(R.id.app_bar_search)?.actionView as SearchView).apply {
 
             isIconified = false
             setSearchableInfo(searchManager.getSearchableInfo(componentName))
@@ -60,30 +64,32 @@ class SearchActivity : AppCompatActivity() {
                 }
 
                 override fun onQueryTextChange(newText: String?): Boolean {
-    //                    if (newText!!.isEmpty()) {
-    //                        return false
-    //                    }
-                    val query = db.collection("users").orderBy("name").startAt(newText!!.trim()).endAt(newText.trim() + "\uf8ff")
+                    if (newText!!.isEmpty()){
+                        return false
+                    }
+                    val query = db.collection("users").orderBy("name").startAt(newText.trim()).endAt(newText.trim() + "\uf8ff")
                     show_results_of_search(::recycler_view , query)
                     return true
                 }
 
             })
         }
-        return super.onCreateOptionsMenu(menu)
+        return true
     }
 
     private fun show_results_of_search(oncomplete:(List<Item>) -> Unit , query: Query) {
 
         val items = mutableListOf<Item>()
+
         query.get().addOnSuccessListener {
             it.documents.forEach{
-                val user = it.toObject(User::class.java)
-                items.add(SearchItems(it.id , user!!,this@SearchActivity))
+                val user = it.toObject(User::class.java)!!
+                if (it.id != my_uid){
+                    items.add(SearchItems(it.id , user,this@SearchActivity))
+                }
             }
             oncomplete(items)
         }
-
     }
 
 

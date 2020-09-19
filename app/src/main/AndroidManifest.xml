@@ -12,8 +12,12 @@
         android:roundIcon="@drawable/messenger"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SearchActivity"></activity>
-        <activity android:name=".ChatActivity"></activity>
+        <activity android:name=".SearchActivity"/>
+        <activity android:name=".ChatActivity"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
+            />
         <activity android:name=".ProfileActivity" />
         <activity android:name=".SignUp" />
         <activity android:name=".SignIn">
